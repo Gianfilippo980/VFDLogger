@@ -21,8 +21,7 @@ Display_ora=Orologio.orologio()
 termometro=Sensori.MCP9808(i2c0, ind_term)
 barometro=Sensori.BMP280(i2c0, ind_bar)
 igrometro= ahtx0.AHT10(i2c0)
-#nmea=open('nmea.txt')
-#questo file contiene una frase nmea di base per far partire il tempo calcolato dal GPS.
+led_pico=machine.Pin(25, machine.Pin.OUT)
 rtc=machine.RTC()
 
 spi = machine.SPI(0, baudrate=1000000, polarity=0, phase=0, bits=8, firstbit=machine.SPI.MSB, sck=machine.Pin(18), mosi=machine.Pin(19), miso=machine.Pin(16))
@@ -98,6 +97,7 @@ except:
     display.scrivi("ERRORE SD!")
  
 while True:
+    led_pico.on()
     t_misura=time.time()
     temp=termometro.temperatura()
     press=barometro.pressione()
@@ -140,11 +140,12 @@ while True:
         #verifico se il file esiste
     except:
         with open(nome_file, "a") as file:
-            file.write("Ora; Minuto; Secondo; Temperatura (°C); Pressione (hPa); Umidità Relativa (%)\r\n")
+            file.write("Anno; Mese; Giorno; Ora; Minuto; Secondo; Temperatura (°C); Pressione (hPa); Umidità Relativa (%)\r\n")
             #se non esiste ci scrivo una bella intestazione    
     with open(nome_file, "a") as file:
-        log=str(stamp[3])+"; "+str(stamp[4])+"; "+str(stamp[5])+"; "+str(temp)+"; "+str(press)+"; "+str(umidità)
+        log=str(stamp[0])+"; "+str(stamp[1])+"; "+str(stamp[2])+"; "+str(stamp[3])+"; "+str(stamp[4])+"; "+str(stamp[5])+"; "+str(temp)+"; "+str(press)+"; "+str(umidità)
         file.write(log+"\r\n")
         print(log)
         #adesso scrivo il log
+    led_pico.off()
     time.sleep(periodo*60)

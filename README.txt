@@ -17,6 +17,6 @@ L'apparato si sincronizza automaticamente con il GPS (se prende) ed è impostato
 
 Si possono ricevere i log in tempo reale anche collegando un computer alla porta micro-USB tipo B che si trova sul microcontrollore, si vede una porta seriale (COMx) a cui ci si puù connettere con un emulatore di terminale (come HTerm), oltre a selezionare la porta, si deve impostare il Baud a 115200, 8 bit, 1 stop, no parità ed è necessario ATTIVARE IL DTR. Il dispositivo non invierà segnali se non riceve il segnale DTR. Il formato dei log è:
 
-Ora; Minuto; Secondo; Temperatura (°C); Pressione (hPa); Unidità Relativa (%)  
+Anno; Mese; Giorno; Ora; Minuto; Secondo; Temperatura (°C); Pressione (hPa); Unidità Relativa (%)  
 
 02/03/2023		Giacinto Boccia
