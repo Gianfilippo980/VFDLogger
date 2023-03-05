@@ -115,10 +115,11 @@ while True:
     except:
             s=""
     else:
-        for c in s:
-            gps.update(c)
-        ora=gps.timestamp
         try:
+            #al ricostruzione della data e ora è tutta un tentaivo
+            for c in s:
+                gps.update(c)
+            ora=gps.timestamp
             #se non ha ricostruito alcun dato, il GPS restituisce 0-0-0, che causa un erroe nella funzione per il calcolo della data
             if ora[0]<fuso_orario :
                 data=aggiungi_un_giorno(gps.date[0], gps.date[1], gps.date[2])
