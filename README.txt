@@ -2,8 +2,8 @@ LOGGER DEI PARAMETRI AMBIENTALI
 
 Pregasi svuotare periodicamente questa microSD: il dispositivo NON è in grado di cancellare i file se la scheda è piena. Comunque dovrebbero occorrere anni perché ciò avvenga.
 
-Anche se non ho misurato un assorbimento di più di 0,5 A, è possibile che ci siano dei picchi imprevisti. Raccomando di alimentare con un alimentatore a 5 V da 1 A o più (standard USB).
-È possibile avere alimentazione contemporaneamente dalla porta di alimentazione e da quella del microcnontrollore: un diodo Schottky fa sì che solo una delle due alimentazioni venga utilizzata.
+Anche se non ho misurato un assorbimento di più di 0,5 A, è possibile che ci siano dei picchi imprevisti. Raccomando di alimentare con un alimentatore a 5 V da 1 A o più (standard USB), attenizone: una scarsa alimentazione farà malfunzionare il lettore SD.
+La porta USB per i dati (quella sul microcontrollore) è protetta dalle correnti inverse tramite un diodo.
 
 La misura avviene ogni minuto (variabile "peiodo" del "main").
 Sensori:	Nomi:		Accuratezze:
