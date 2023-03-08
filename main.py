@@ -7,19 +7,21 @@ import ahtx0
 import time
 import sdcard
 import uos
+import bmp280
 from sys import stdout
 
 ind_term=0x18			#indirizzo termometro
 ind_bar=0x76			#indirizzo del barometro
 ind_igro=0x38			#indirizzo igrometro
-periodo=1				#Minuti di attesa fra le mmisurazioni
+periodo=1				#Minuti di attesa fra le misurazioni
 fuso_orario=1			#ore di differenza dall'UTC
 uart0=machine.UART(0, baudrate=9600, tx=machine.Pin(0), rx=machine.Pin(1))
 i2c0=machine.I2C(0, scl=machine.Pin(21), sda=machine.Pin(20))
 gps=micropyGPS.MicropyGPS(fuso_orario)
 Display_ora=Orologio.orologio()
 termometro=Sensori.MCP9808(i2c0, ind_term)
-barometro=Sensori.BMP280(i2c0, ind_bar)
+barometro=bmp280.BMP280(i2c0, ind_bar, 5)
+#Il caso d'uso (terza varaibile) '5' corrisponde all'uso per la navogazione indoor (descritto nel datasheet, cui compete la massima risoluzione, e un filtraggio dei dati (il sensore effettua una media)
 igrometro= ahtx0.AHT10(i2c0)
 led_pico=machine.Pin(25, machine.Pin.OUT)
 rtc=machine.RTC()
@@ -100,12 +102,12 @@ while True:
     led_pico.on()
     t_misura=time.time()
     temp=termometro.temperatura()
-    press=barometro.pressione()
+    press=barometro.pressure/100
     umidità=igrometro.relative_humidity
     if press<1000:
-        p_str=str(int(press))+" | "
+        p_str=str(round(press))+" | "
     else:
-        p_str=str(int(press))+"| "
+        p_str=str(round(press))+"| "
         #se la pressione è più di 1000, devo usare uno spazio in meno per essere entro i 30 caratteri nel caso in cui l'umidità sia il 100%
     riga=str(round(temp,2))+" | "+p_str+str(round(umidità,2))
     #print(riga)
@@ -140,9 +142,12 @@ while True:
         open(nome_file, "r")
         #verifico se il file esiste
     except:
-        with open(nome_file, "a") as file:
-            file.write("Anno; Mese; Giorno; Ora; Minuto; Secondo; Temperatura (°C); Pressione (hPa); Umidità Relativa (%)\r\n")
-            #se non esiste ci scrivo una bella intestazione    
+        try:
+            with open(nome_file, "a") as file:
+                file.write("Anno; Mese; Giorno; Ora; Minuto; Secondo; Temperatura (°C); Pressione (hPa); Umidità Relativa (%)\r\n")
+                #se il file non esiste ci scrivo una bella intestazione
+        except:
+            display.scrivi("ERRORE SD!")
     with open(nome_file, "a") as file:
         log=str(stamp[0])+"; "+str(stamp[1])+"; "+str(stamp[2])+"; "+str(stamp[3])+"; "+str(stamp[4])+"; "+str(stamp[5])+"; "+str(temp)+"; "+str(press)+"; "+str(umidità)
         file.write(log+"\r\n")
