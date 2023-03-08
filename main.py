@@ -148,10 +148,16 @@ while True:
                 #se il file non esiste ci scrivo una bella intestazione
         except:
             display.scrivi("ERRORE SD!")
-    with open(nome_file, "a") as file:
-        log=str(stamp[0])+"; "+str(stamp[1])+"; "+str(stamp[2])+"; "+str(stamp[3])+"; "+str(stamp[4])+"; "+str(stamp[5])+"; "+str(temp)+"; "+str(press)+"; "+str(umidità)
-        file.write(log+"\r\n")
-        print(log)
-        #adesso scrivo il log
+    log=str(stamp[0])+"; "+str(stamp[1])+"; "+str(stamp[2])+"; "+str(stamp[3])+"; "+str(stamp[4])+"; "+str(stamp[5])+"; "+str(temp)+"; "+str(press)+"; "+str(umidità)
+    try:
+        with open(nome_file, "a") as file:
+            file.write(log+"\r\n")
+            #adesso scrivo il log nel file
+    except:
+        display.scrivi("ERRORE SD!")
+        display.scrivi(riga)
+        #se ho problemi con la SD voglio che appaia la scritta ma comunque una delle due righe deve contenere i dati
+    print(log)
+    #il log viene inviato trmite seriale
     led_pico.off()
     time.sleep(periodo*60)
