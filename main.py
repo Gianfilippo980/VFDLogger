@@ -84,8 +84,12 @@ def aggiungi_un_giorno(giorno, mese, anno):
     #così ho dato al decodificatore GPS una finta posizione e lui fa partire il tempo anche se non prende.
 
 def mostra_ora ():
+    stamp=time.localtime()
     while True:
-        stamp=time.localtime()
+        try:
+            stamp=time.localtime()
+        except:
+            True
         ora=[stamp[3]//10, stamp[3]%10, 1, stamp[4]//10, stamp[4]%10]
         Display_ora.orario(ora)
 _thread.start_new_thread(mostra_ora, ())
