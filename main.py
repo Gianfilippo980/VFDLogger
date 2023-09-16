@@ -55,7 +55,8 @@ class Futaba:
         time.sleep_ms(self.sleep)
         self.uart.write(nuovo)
         self.prec=nuovo
-        
+display=Futaba(uart0)
+
 def aggiungi_un_giorno(giorno, mese, anno):
     # definisci un dizionario con i giorni di ogni mese
     giorni_per_mese = {1: 31, 2: 28, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30,10:31 ,11:30 ,12:31}
@@ -88,34 +89,16 @@ def mostra_ora ():
         ora=[stamp[3]//10, stamp[3]%10, 1, stamp[4]//10, stamp[4]%10]
         Display_ora.orario(ora)
 _thread.start_new_thread(mostra_ora, ())
-#questa va in esecuzione nel secondo core
+#questa va in esecuzione nel secondo core    
 
-display=Futaba(uart0)
-try:
-    sd = sdcard.SDCard(spi, cs)
-    vfs = uos.VfsFat(sd)
-    uos.mount(vfs, "/sd")
-except:
-    display.scrivi("ERRORE SD!")
- 
+t_prec=time.time()
+
 while True:
-    led_pico.on()
-    t_misura=time.time()
-    temp=termometro.temperatura()
-    press=barometro.pressure/100
-    umidità=igrometro.relative_humidity
-    if press<1000:
-        p_str=str(round(press))+" | "
-    else:
-        p_str=str(round(press))+"| "
-        #se la pressione è più di 1000, devo usare uno spazio in meno per essere entro i 30 caratteri nel caso in cui l'umidità sia il 100%
-    riga=str(round(temp,2))+" | "+p_str+str(round(umidità,2))
-    #print(riga)
-    display.scrivi(riga)    
+
     try:
         s=uart0.read().decode()
     except:
-            s=""
+        s=""
     else:
         try:
             #al ricostruzione della data e ora è tutta un tentaivo
@@ -131,33 +114,57 @@ while True:
             s=""
         else:
             data_ora=(2000+data[2], data[1], data[0],0,ora[0], ora[1], int(ora[2]),0)
-            #print(data_ora)
             try:
                 rtc.datetime(data_ora)
             except:
                 s=""
-    stamp=time.localtime(t_misura)
-    nome_file="/sd/"+str(stamp[2])+"-"+str(stamp[1])+"-"+str(stamp[0])+".csv"
-    try:
-        open(nome_file, "r")
-        #verifico se il file esiste
-    except:
+
+    if time.time()-t_prec>=periodo*60 :            
+        led_pico.on()
+        t_misura=time.time()
+        temp=termometro.temperatura()
+        press=barometro.pressure/100
+        umidità=igrometro.relative_humidity
+        if press<1000:
+            p_str=str(round(press))+" | "
+        else:
+            p_str=str(round(press))+"| "
+            #se la pressione è più di 1000, devo usare uno spazio in meno per essere entro i 30 caratteri nel caso in cui l'umidità sia il 100%
+        riga=str(round(temp,2))+" | "+p_str+str(round(umidità,2))
+        #print(riga)
+        display.scrivi(riga)    
+
+        stamp=time.localtime(t_misura)
+        nome_file="/sd/"+str(stamp[2])+"-"+str(stamp[1])+"-"+str(stamp[0])+".csv"
+        try:
+            open(nome_file, "r")
+            #verifico se il file esiste
+        except:
+            try:
+                with open(nome_file, "a") as file:
+                    file.write("Anno; Mese; Giorno; Ora; Minuto; Secondo; Temperatura (°C); Pressione (hPa); Umidità Relativa (%)\r\n")
+                    #se il file non esiste ci scrivo una bella intestazione
+            except:
+                try:
+                    sd = sdcard.SDCard(spi, cs)
+                    vfs = uos.VfsFat(sd)
+                    uos.mount(vfs, "/sd")
+                    with open(nome_file, "a") as file:
+                        file.write("Anno; Mese; Giorno; Ora; Minuto; Secondo; Temperatura (°C); Pressione (hPa); Umidità Relativa (%)\r\n")
+                    #se il file non esiste ci scrivo una bella intestazione
+                except:
+                    display.scrivi("ERRORE SD!")
+
+        log=str(stamp[0])+"; "+str(stamp[1])+"; "+str(stamp[2])+"; "+str(stamp[3])+"; "+str(stamp[4])+"; "+str(stamp[5])+"; "+str(temp)+"; "+str(press)+"; "+str(umidità)
         try:
             with open(nome_file, "a") as file:
-                file.write("Anno; Mese; Giorno; Ora; Minuto; Secondo; Temperatura (°C); Pressione (hPa); Umidità Relativa (%)\r\n")
-                #se il file non esiste ci scrivo una bella intestazione
+                file.write(log+"\r\n")
+                #adesso scrivo il log nel file
         except:
-            display.scrivi("ERRORE SD!")
-    log=str(stamp[0])+"; "+str(stamp[1])+"; "+str(stamp[2])+"; "+str(stamp[3])+"; "+str(stamp[4])+"; "+str(stamp[5])+"; "+str(temp)+"; "+str(press)+"; "+str(umidità)
-    try:
-        with open(nome_file, "a") as file:
-            file.write(log+"\r\n")
-            #adesso scrivo il log nel file
-    except:
-        display.scrivi("ERRORE SD!")
-        display.scrivi(riga)
-        #se ho problemi con la SD voglio che appaia la scritta ma comunque una delle due righe deve contenere i dati
-    print(log)
-    #il log viene inviato trmite seriale
-    led_pico.off()
-    time.sleep(periodo*60)
+            display.scrivi("ERRORE FILE!")
+            display.scrivi(riga)
+            #se ho problemi con la SD voglio che appaia la scritta ma comunque una delle due righe deve contenere i dati
+        print(log)
+        #il log viene inviato trmite seriale
+        led_pico.off()
+        t_prec=time.time()
