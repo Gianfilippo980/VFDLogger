@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: micropyGPS
+Version: 1.0
+Summary: GPS NMEA sentence parser
+Home-page: https://github.com/inmcm/micropyGPS
+Author: Calvin McCoy
+Author-email: calvin.mccoy@protonmail.com
+License-File: LICENSE
+

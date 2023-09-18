@@ -1,5 +1,6 @@
-from machine import Pin
+from machine import Pin, WDT
 from utime import sleep_ms
+import time
 
 class orologio :
     griglie= (2, 6, 8, 11, 15)
@@ -27,7 +28,7 @@ class orologio :
     def orario (self, ora):
         #global ora
         #ora è una lista di 5 cifre, quella centrale sono i due punti (0,1)
-        for j in range(10):
+        for j in range(20):
         #è inutile cambiare l'ora per ogni ciclo, rischia solo di abbassare la luminosità
             for i in range(len(self.griglie)):
                 #imposto i segmenti
@@ -38,3 +39,14 @@ class orologio :
                 self.gr[i].value(0)
                 sleep_ms(3)
                 self.gr[i].value(1)
+
+Display_ora=orologio()
+watch_dog=WDT(timeout=8388)
+
+def mostra_ora ():
+    ora=[2, 0, 0, 2, 3]
+    while True:
+        stamp=time.localtime()
+        ora=[stamp[3]//10, stamp[3]%10, 1, stamp[4]//10, stamp[4]%10]
+        Display_ora.orario(ora)
+        watch_dog.feed()
